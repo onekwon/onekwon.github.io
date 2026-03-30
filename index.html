@@ -3,45 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Store Page</title>
+    <title>Menu with Dynamic Content</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        function showContent(contentId) {
+            const contents = document.querySelectorAll('.content-section');
+            contents.forEach(content => content.style.display = 'none');
+            document.getElementById(contentId).style.display = 'block';
+        }
+    </script>
 </head>
 <body>
-    <header>
-        <div class="logo">App Store</div>
+    <header class="top-nav">
+        <div class="logo">My Website</div>
         <nav>
             <ul>
                 <li><a href="#">Home</a></li>
-                <li><a href="#">Categories</a></li>
+                <li><a href="#">About</a></li>
                 <li><a href="#">Contact</a></li>
             </ul>
         </nav>
     </header>
-    <main class="app-details">
-        <section class="app-header">
-            <img src="app-icon.png" alt="App Icon" class="app-icon">
-            <div class="app-info">
-                <h1>App Name</h1>
-                <p>Developer: Developer Name</p>
-                <p>Category: Productivity</p>
-                <button class="download-btn">Download</button>
+    <div class="container">
+        <aside class="sidebar">
+            <ul>
+                <li><a href="#" onclick="showContent('content1')">Menu 1</a></li>
+                <li><a href="#" onclick="showContent('content2')">Menu 2</a></li>
+                <li><a href="#" onclick="showContent('content3')">Menu 3</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <div id="content1" class="content-section">
+                <h1>Content 1</h1>
+                <p>This is the content for Menu 1.</p>
             </div>
-        </section>
-        <section class="app-description">
-            <h2>About this App</h2>
-            <p>This app helps you stay productive and manage your tasks efficiently. With a user-friendly interface and powerful features, it is the perfect tool for professionals and students alike.</p>
-        </section>
-        <section class="app-screenshots">
-            <h2>Screenshots</h2>
-            <div class="screenshots">
-                <img src="screenshot1.png" alt="Screenshot 1">
-                <img src="screenshot2.png" alt="Screenshot 2">
-                <img src="screenshot3.png" alt="Screenshot 3">
+            <div id="content2" class="content-section" style="display: none;">
+                <h1>Content 2</h1>
+                <p>This is the content for Menu 2.</p>
             </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 App Store</p>
-    </footer>
+            <div id="content3" class="content-section" style="display: none;">
+                <h1>Content 3</h1>
+                <p>This is the content for Menu 3.</p>
+            </div>
+        </main>
+    </div>
 </body>
 </html>
