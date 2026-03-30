@@ -3,26 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Website</title>
+    <title>App Store Page</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Welcome to My Personal Website</h1>
+        <div class="logo">App Store</div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Categories</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
     </header>
-    <main>
-        <section>
-            <h2>About Me</h2>
-            <p>This is a brief introduction about myself.</p>
+    <main class="app-details">
+        <section class="app-header">
+            <img src="app-icon.png" alt="App Icon" class="app-icon">
+            <div class="app-info">
+                <h1>App Name</h1>
+                <p>Developer: Developer Name</p>
+                <p>Category: Productivity</p>
+                <button class="download-btn">Download</button>
+            </div>
         </section>
-        <section>
-            <h2>Projects</h2>
-            <p>Here are some of my projects.</p>
+        <section class="app-description">
+            <h2>About this App</h2>
+            <p>This app helps you stay productive and manage your tasks efficiently. With a user-friendly interface and powerful features, it is the perfect tool for professionals and students alike.</p>
+        </section>
+        <section class="app-screenshots">
+            <h2>Screenshots</h2>
+            <div class="screenshots">
+                <img src="screenshot1.png" alt="Screenshot 1">
+                <img src="screenshot2.png" alt="Screenshot 2">
+                <img src="screenshot3.png" alt="Screenshot 3">
+            </div>
         </section>
     </main>
     <footer>
-        <p>&copy; 2026 My Personal Website</p>
+        <p>&copy; 2026 App Store</p>
     </footer>
-    <script src="script.js"></script>
 </body>
 </html>
