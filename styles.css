@@ -219,3 +219,10 @@ footer {
 .content-section:first-child {
     display: block;
 }
+
+.sidebar ul li a.active {
+  background-color: #0078d4;
+  color: #fff;
+  font-weight: bold;
+}
+``
