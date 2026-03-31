@@ -5,18 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu with Dynamic Content</title>
     <link rel="stylesheet" href="styles.css">
-    <script>
-        function loadContent(file) {
-            fetch(file)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('content-area').innerHTML = html;
-                })
-                .catch(err => {
-                    document.getElementById('content-area').innerHTML = '<p>콘텐츠를 불러오지 못했습니다.</p>';
-                });
-        }
-    </script>
 </head>
 <body>
     <header class="top-nav">
