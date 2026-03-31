@@ -6,10 +6,15 @@
     <title>Menu with Dynamic Content</title>
     <link rel="stylesheet" href="styles.css">
     <script>
-        function showContent(contentId) {
-            const contents = document.querySelectorAll('.content-section');
-            contents.forEach(content => content.style.display = 'none');
-            document.getElementById(contentId).style.display = 'block';
+        function loadContent(file) {
+            fetch(file)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('content-area').innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById('content-area').innerHTML = '<p>콘텐츠를 불러오지 못했습니다.</p>';
+                });
         }
     </script>
 </head>
@@ -27,23 +32,14 @@
     <div class="container">
         <aside class="sidebar">
             <ul>
-                <li><a href="#" onclick="showContent('content1')">Menu 1</a></li>
-                <li><a href="#" onclick="showContent('content2')">Menu 2</a></li>
-                <li><a href="#" onclick="showContent('content3')">Menu 3</a></li>
+                <li><a href="#" onclick="loadContent('content1.html')">Menu 1</a></li>
+                <li><a href="#" onclick="loadContent('content2.html')">Menu 2</a></li>
+                <li><a href="#" onclick="loadContent('content3.html')">Menu 3</a></li>
             </ul>
         </aside>
         <main class="content">
-            <div id="content1" class="content-section">
-                <h1>Content 1</h1>
-                <p>This is the content for Menu 1.</p>
-            </div>
-            <div id="content2" class="content-section" style="display: none;">
-                <h1>Content 2</h1>
-                <p>This is the content for Menu 2.</p>
-            </div>
-            <div id="content3" class="content-section" style="display: none;">
-                <h1>Content 3</h1>
-                <p>This is the content for Menu 3.</p>
+            <div id="content-area">
+            <!-- 여기에 다른 파일 내용이 로드됨 -->
             </div>
         </main>
     </div>
