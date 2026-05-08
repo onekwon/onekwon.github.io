@@ -1,3 +1,206 @@
 
-<h1>Content 3</h1>
-<p>이 내용은 content3.html 파일에서 불러왔습니다.</p>
+<style>
+  .typing-container { padding: 20px; font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; }
+  .typing-title    { font-size: 1.8rem; text-align: center; margin-bottom: 6px; }
+  .typing-subtitle { text-align: center; color: #666; margin-bottom: 24px; }
+  .typing-stats {
+    display: flex; justify-content: center; gap: 28px; margin-bottom: 20px;
+  }
+  .typing-stat-box {
+    background: white; border-radius: 12px; padding: 12px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; min-width: 80px;
+  }
+  .typing-stat-value { font-size: 1.8rem; font-weight: bold; color: #4a90e2; }
+  .typing-stat-label { font-size: 0.75rem; color: #888; margin-top: 2px; }
+  .typing-text-box {
+    background: #f8f9fa; border-radius: 12px; padding: 16px 20px;
+    font-size: 1.1rem; line-height: 1.8; margin-bottom: 16px;
+    min-height: 80px; letter-spacing: 0.03em;
+  }
+  .char-default  { color: #aaa; }
+  .char-correct  { color: #28a745; }
+  .char-wrong    { color: #dc3545; background: #ffe0e0; border-radius: 2px; }
+  .char-cursor   { border-left: 2px solid #4a90e2; margin-left: -1px; }
+  .typing-input  {
+    width: 100%; box-sizing: border-box; padding: 12px 16px;
+    font-size: 1rem; border: 2px solid #ddd; border-radius: 10px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .typing-input:focus { border-color: #4a90e2; }
+  .typing-controls { display: flex; justify-content: center; gap: 12px; margin-top: 14px; }
+  .typing-btn {
+    padding: 10px 22px; font-size: 0.95rem; border: none;
+    border-radius: 10px; cursor: pointer; transition: background 0.2s;
+  }
+  .typing-btn-primary   { background: #4a90e2; color: white; }
+  .typing-btn-primary:hover { background: #357abd; }
+  .typing-btn-secondary { background: #e9ecef; color: #555; }
+  .typing-btn-secondary:hover { background: #dee2e6; }
+  .typing-result {
+    display: none; text-align: center; margin-top: 20px;
+    background: #d4edda; border-radius: 12px; padding: 16px;
+    color: #155724; font-size: 1.05rem;
+  }
+  .typing-timer-bar-wrap {
+    background: #e9ecef; border-radius: 8px; height: 8px; margin-bottom: 16px; overflow: hidden;
+  }
+  .typing-timer-bar { height: 100%; background: #4a90e2; transition: width 0.1s linear; border-radius: 8px; }
+</style>
+
+<div class="typing-container">
+  <div class="typing-title">⌨️ 타이핑 속도 테스트</div>
+  <div class="typing-subtitle">제시된 문장을 빠르고 정확하게 입력해보세요! (제한 시간 30초)</div>
+
+  <div class="typing-stats">
+    <div class="typing-stat-box">
+      <div class="typing-stat-value" id="typing-wpm">0</div>
+      <div class="typing-stat-label">WPM</div>
+    </div>
+    <div class="typing-stat-box">
+      <div class="typing-stat-value" id="typing-accuracy">100</div>
+      <div class="typing-stat-label">정확도 %</div>
+    </div>
+    <div class="typing-stat-box">
+      <div class="typing-stat-value" id="typing-time">30</div>
+      <div class="typing-stat-label">남은 시간</div>
+    </div>
+  </div>
+
+  <div class="typing-timer-bar-wrap">
+    <div class="typing-timer-bar" id="typing-timer-bar" style="width:100%"></div>
+  </div>
+
+  <div class="typing-text-box" id="typing-display"></div>
+  <input class="typing-input" id="typing-input" type="text" placeholder="여기에 입력하세요..." autocomplete="off" autocorrect="off" spellcheck="false">
+  <div class="typing-controls">
+    <button class="typing-btn typing-btn-primary"   id="typing-start-btn">▶ 시작</button>
+    <button class="typing-btn typing-btn-secondary" id="typing-reset-btn">↺ 다시하기</button>
+  </div>
+  <div class="typing-result" id="typing-result"></div>
+</div>
+
+<script>
+(function() {
+  const SENTENCES = [
+    "The quick brown fox jumps over the lazy dog",
+    "JavaScript is a versatile programming language",
+    "Practice makes perfect every single day",
+    "Learning to code opens many new doors",
+    "Keep calm and write clean code always",
+    "Every expert was once a beginner too",
+    "Small steps lead to big achievements",
+    "Consistency is the key to mastery",
+  ];
+  const TIME_LIMIT = 30;
+  let sentence = '', timer = null, timeLeft = TIME_LIMIT;
+  let started = false, finished = false, totalTyped = 0, correctTyped = 0;
+
+  const displayEl  = document.getElementById('typing-display');
+  const inputEl    = document.getElementById('typing-input');
+  const wpmEl      = document.getElementById('typing-wpm');
+  const accEl      = document.getElementById('typing-accuracy');
+  const timeEl     = document.getElementById('typing-time');
+  const barEl      = document.getElementById('typing-timer-bar');
+  const resultEl   = document.getElementById('typing-result');
+  const startBtn   = document.getElementById('typing-start-btn');
+  const resetBtn   = document.getElementById('typing-reset-btn');
+
+  function renderText(typed) {
+    displayEl.innerHTML = sentence.split('').map((ch, i) => {
+      let cls = 'char-default';
+      if (i < typed.length) cls = typed[i] === ch ? 'char-correct' : 'char-wrong';
+      const cursor = (i === typed.length) ? ' char-cursor' : '';
+      return `<span class="${cls}${cursor}">${ch}</span>`;
+    }).join('');
+  }
+
+  function calcWpm(elapsed) {
+    const words = correctTyped / 5;
+    const mins  = elapsed / 60;
+    return mins > 0 ? Math.round(words / mins) : 0;
+  }
+
+  function updateStats() {
+    const elapsed = TIME_LIMIT - timeLeft;
+    wpmEl.textContent = calcWpm(elapsed);
+    accEl.textContent = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
+    timeEl.textContent = timeLeft;
+    barEl.style.width  = (timeLeft / TIME_LIMIT * 100) + '%';
+  }
+
+  function endGame() {
+    finished = true;
+    clearInterval(timer);
+    inputEl.disabled = true;
+    const elapsed = TIME_LIMIT - timeLeft;
+    const wpm = calcWpm(elapsed > 0 ? elapsed : 1);
+    const acc = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = `
+      🎉 완료! &nbsp;
+      <strong>WPM: ${wpm}</strong> &nbsp;|&nbsp;
+      <strong>정확도: ${acc}%</strong> &nbsp;|&nbsp;
+      ${acc >= 90 ? '👏 훌륭해요!' : acc >= 70 ? '😊 잘했어요!' : '💪 더 연습해봐요!'}
+    `;
+    startBtn.textContent = '▶ 시작';
+    started = false;
+  }
+
+  function startGame() {
+    sentence     = SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
+    timeLeft     = TIME_LIMIT;
+    started      = true;
+    finished     = false;
+    totalTyped   = 0;
+    correctTyped = 0;
+    inputEl.value    = '';
+    inputEl.disabled = false;
+    resultEl.style.display = 'none';
+    startBtn.textContent   = '■ 진행중';
+    renderText('');
+    updateStats();
+    inputEl.focus();
+
+    timer = setInterval(() => {
+      timeLeft--;
+      updateStats();
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  inputEl.addEventListener('input', () => {
+    if (!started || finished) return;
+    const typed = inputEl.value;
+    totalTyped = typed.length;
+    correctTyped = typed.split('').filter((ch, i) => ch === sentence[i]).length;
+    renderText(typed);
+    updateStats();
+    if (typed === sentence) endGame();
+  });
+
+  startBtn.addEventListener('click', () => {
+    if (started) return;
+    clearInterval(timer);
+    startGame();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    clearInterval(timer);
+    started = false; finished = false;
+    timeLeft = TIME_LIMIT; totalTyped = 0; correctTyped = 0;
+    inputEl.value = ''; inputEl.disabled = false;
+    wpmEl.textContent = '0'; accEl.textContent = '100';
+    timeEl.textContent = TIME_LIMIT;
+    barEl.style.width = '100%';
+    resultEl.style.display = 'none';
+    startBtn.textContent = '▶ 시작';
+    sentence = SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
+    renderText('');
+  });
+
+  // 초기 텍스트 표시
+  sentence = SENTENCES[Math.floor(Math.random() * SENTENCES.length)];
+  renderText('');
+  inputEl.disabled = true;
+})();
+</script>

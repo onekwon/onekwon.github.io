@@ -1,3 +1,123 @@
+<style>
+  .rps-container { text-align: center; padding: 20px; font-family: Arial, sans-serif; }
+  .rps-title { font-size: 1.8rem; margin-bottom: 8px; }
+  .rps-subtitle { color: #666; margin-bottom: 24px; }
+  .rps-buttons { display: flex; justify-content: center; gap: 16px; margin-bottom: 28px; }
+  .rps-btn {
+    font-size: 2.5rem; padding: 16px 24px; border: 3px solid #ddd;
+    border-radius: 16px; background: white; cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .rps-btn:hover { transform: scale(1.15); border-color: #4a90e2; }
+  .rps-result-box {
+    display: flex; justify-content: center; align-items: center; gap: 32px;
+    margin-bottom: 20px; min-height: 80px;
+  }
+  .rps-player, .rps-computer { text-align: center; }
+  .rps-choice { font-size: 3rem; }
+  .rps-label { font-size: 0.85rem; color: #888; margin-top: 4px; }
+  .rps-vs { font-size: 1.4rem; font-weight: bold; color: #aaa; }
+  .rps-message {
+    font-size: 1.4rem; font-weight: bold; padding: 12px 24px;
+    border-radius: 12px; display: inline-block; min-width: 200px;
+  }
+  .rps-message.win  { background: #d4edda; color: #155724; }
+  .rps-message.lose { background: #f8d7da; color: #721c24; }
+  .rps-message.draw { background: #fff3cd; color: #856404; }
+  .rps-score { font-size: 1.1rem; margin-top: 16px; color: #444; }
+  .rps-reset {
+    margin-top: 12px; padding: 8px 20px; font-size: 0.9rem;
+    border: 2px solid #ccc; border-radius: 8px; background: white;
+    cursor: pointer; color: #555;
+  }
+  .rps-reset:hover { background: #f0f0f0; }
+</style>
 
-<h1>Content 1</h1>
-<p>이 내용은 content1.html 파일에서 불러왔습니다.</p>
+<div class="rps-container">
+  <div class="rps-title">✊ 가위바위보 게임</div>
+  <div class="rps-subtitle">버튼을 클릭해서 컴퓨터와 대결해보세요!</div>
+
+  <div class="rps-buttons">
+    <button class="rps-btn" data-choice="scissors" title="가위">✌️</button>
+    <button class="rps-btn" data-choice="rock"     title="바위">✊</button>
+    <button class="rps-btn" data-choice="paper"    title="보">🖐️</button>
+  </div>
+
+  <div class="rps-result-box">
+    <div class="rps-player">
+      <div class="rps-choice" id="rps-player-choice">❓</div>
+      <div class="rps-label">나</div>
+    </div>
+    <div class="rps-vs">VS</div>
+    <div class="rps-computer">
+      <div class="rps-choice" id="rps-computer-choice">❓</div>
+      <div class="rps-label">컴퓨터</div>
+    </div>
+  </div>
+
+  <div id="rps-message" class="rps-message" style="visibility:hidden;">-</div>
+  <div class="rps-score">
+    승: <strong id="rps-win">0</strong> &nbsp;|&nbsp;
+    패: <strong id="rps-lose">0</strong> &nbsp;|&nbsp;
+    무: <strong id="rps-draw">0</strong>
+  </div>
+  <button class="rps-reset" id="rps-reset-btn">점수 초기화</button>
+</div>
+
+<script>
+(function() {
+  const emojis = { rock: '✊', scissors: '✌️', paper: '🖐️' };
+  const choices = ['rock', 'scissors', 'paper'];
+  const labels  = { rock: '바위', scissors: '가위', paper: '보' };
+  let score = { win: 0, lose: 0, draw: 0 };
+
+  function getResult(player, computer) {
+    if (player === computer) return 'draw';
+    if (
+      (player === 'rock'     && computer === 'scissors') ||
+      (player === 'scissors' && computer === 'paper')    ||
+      (player === 'paper'    && computer === 'rock')
+    ) return 'win';
+    return 'lose';
+  }
+
+  function updateScore() {
+    document.getElementById('rps-win').textContent  = score.win;
+    document.getElementById('rps-lose').textContent = score.lose;
+    document.getElementById('rps-draw').textContent = score.draw;
+  }
+
+  document.querySelectorAll('.rps-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const player   = btn.dataset.choice;
+      const computer = choices[Math.floor(Math.random() * choices.length)];
+      const result   = getResult(player, computer);
+
+      document.getElementById('rps-player-choice').textContent   = emojis[player];
+      document.getElementById('rps-computer-choice').textContent = emojis[computer];
+
+      const msgEl = document.getElementById('rps-message');
+      msgEl.style.visibility = 'visible';
+      msgEl.className = 'rps-message ' + result;
+
+      const msgs = {
+        win:  '🎉 이겼습니다! (' + labels[player] + ' > ' + labels[computer] + ')',
+        lose: '😢 졌습니다! (' + labels[computer] + ' > ' + labels[player] + ')',
+        draw: '🤝 비겼습니다! (둘 다 ' + labels[player] + ')'
+      };
+      msgEl.textContent = msgs[result];
+      score[result]++;
+      updateScore();
+    });
+  });
+
+  document.getElementById('rps-reset-btn').addEventListener('click', () => {
+    score = { win: 0, lose: 0, draw: 0 };
+    updateScore();
+    document.getElementById('rps-player-choice').textContent   = '❓';
+    document.getElementById('rps-computer-choice').textContent = '❓';
+    const msgEl = document.getElementById('rps-message');
+    msgEl.style.visibility = 'hidden';
+  });
+})();
+</script>
