@@ -1,0 +1,278 @@
+<style>
+	.weather-card {
+		max-width: 760px;
+		margin: 0 auto;
+		padding: 28px;
+		border-radius: 24px;
+		background: linear-gradient(135deg, #f4f8ff 0%, #fff7ec 100%);
+		box-shadow: 0 18px 40px rgba(36, 63, 99, 0.14);
+		font-family: Arial, sans-serif;
+	}
+
+	.weather-title {
+		margin: 0 0 8px;
+		font-size: 2rem;
+		color: #1f3552;
+	}
+
+	.weather-subtitle {
+		margin: 0 0 24px;
+		color: #53657d;
+		line-height: 1.6;
+	}
+
+	.weather-form {
+		display: flex;
+		gap: 12px;
+		flex-wrap: wrap;
+		margin-bottom: 24px;
+	}
+
+	.weather-input {
+		flex: 1 1 260px;
+		padding: 14px 16px;
+		border: 1px solid #cdd8e6;
+		border-radius: 14px;
+		font-size: 1rem;
+		background: #fff;
+	}
+
+	.weather-button {
+		padding: 14px 20px;
+		border: none;
+		border-radius: 14px;
+		background: #2864dc;
+		color: #fff;
+		font-size: 1rem;
+		cursor: pointer;
+	}
+
+	.weather-button:hover {
+		background: #1c53c2;
+	}
+
+	.weather-status {
+		min-height: 24px;
+		margin-bottom: 20px;
+		color: #41556e;
+		font-size: 0.95rem;
+	}
+
+	.weather-status.error {
+		color: #b42318;
+	}
+
+	.weather-result {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 16px;
+	}
+
+	.weather-panel {
+		padding: 18px;
+		border-radius: 18px;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(8px);
+	}
+
+	.weather-label {
+		margin-bottom: 8px;
+		color: #687b92;
+		font-size: 0.9rem;
+	}
+
+	.weather-value {
+		font-size: 1.55rem;
+		font-weight: 700;
+		color: #1f3552;
+	}
+
+	.weather-meta {
+		margin-top: 6px;
+		color: #5f7186;
+		line-height: 1.5;
+	}
+
+	@media (max-width: 640px) {
+		.weather-card {
+			padding: 20px;
+		}
+
+		.weather-title {
+			font-size: 1.6rem;
+		}
+
+		.weather-button {
+			width: 100%;
+		}
+	}
+</style>
+
+<section class="weather-card">
+	<h1 class="weather-title">⛅ 지역 시간과 날씨</h1>
+	<p class="weather-subtitle">장소를 입력하면 현재 시간과 날씨를 바로 확인할 수 있습니다. 예: 서울, Busan, Tokyo</p>
+
+	<form class="weather-form" id="weather-form">
+		<input
+			class="weather-input"
+			id="weather-location"
+			type="text"
+			placeholder="장소를 입력하세요"
+			value="Seoul"
+			autocomplete="off"
+		>
+		<button class="weather-button" type="submit">조회하기</button>
+	</form>
+
+	<div class="weather-status" id="weather-status"></div>
+
+	<div class="weather-result" id="weather-result" hidden>
+		<div class="weather-panel">
+			<div class="weather-label">지역</div>
+			<div class="weather-value" id="weather-place">-</div>
+			<div class="weather-meta" id="weather-country">-</div>
+		</div>
+		<div class="weather-panel">
+			<div class="weather-label">현재 시간</div>
+			<div class="weather-value" id="weather-time">-</div>
+			<div class="weather-meta" id="weather-timezone">-</div>
+		</div>
+		<div class="weather-panel">
+			<div class="weather-label">현재 날씨</div>
+			<div class="weather-value" id="weather-temp">-</div>
+			<div class="weather-meta" id="weather-desc">-</div>
+		</div>
+	</div>
+</section>
+
+<script>
+(function() {
+	const weatherCodeMap = {
+		0: '맑음',
+		1: '대체로 맑음',
+		2: '구름 조금',
+		3: '흐림',
+		45: '안개',
+		48: '짙은 안개',
+		51: '이슬비',
+		53: '보통 이슬비',
+		55: '강한 이슬비',
+		61: '약한 비',
+		63: '비',
+		65: '강한 비',
+		71: '약한 눈',
+		73: '눈',
+		75: '강한 눈',
+		80: '소나기',
+		81: '강한 소나기',
+		82: '매우 강한 소나기',
+		95: '천둥번개',
+		96: '우박 동반 천둥번개',
+		99: '강한 우박 동반 천둥번개'
+	};
+
+	const form = document.getElementById('weather-form');
+	const input = document.getElementById('weather-location');
+	const statusEl = document.getElementById('weather-status');
+	const resultEl = document.getElementById('weather-result');
+	const placeEl = document.getElementById('weather-place');
+	const countryEl = document.getElementById('weather-country');
+	const timeEl = document.getElementById('weather-time');
+	const timezoneEl = document.getElementById('weather-timezone');
+	const tempEl = document.getElementById('weather-temp');
+	const descEl = document.getElementById('weather-desc');
+
+	function setStatus(message, isError) {
+		statusEl.textContent = message;
+		statusEl.className = isError ? 'weather-status error' : 'weather-status';
+	}
+
+	function formatClock(timeZone) {
+		return new Intl.DateTimeFormat('ko-KR', {
+			timeZone,
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit',
+			hour12: false
+		}).format(new Date());
+	}
+
+	function startClock(timeZone) {
+		if (window.weatherClockInterval) {
+			clearInterval(window.weatherClockInterval);
+		}
+
+		timeEl.textContent = formatClock(timeZone);
+		window.weatherClockInterval = setInterval(() => {
+			if (!document.getElementById('weather-time')) {
+				clearInterval(window.weatherClockInterval);
+				window.weatherClockInterval = null;
+				return;
+			}
+			timeEl.textContent = formatClock(timeZone);
+		}, 1000);
+	}
+
+	async function fetchWeather(locationName) {
+		setStatus('지역과 날씨 정보를 불러오는 중입니다...', false);
+		resultEl.hidden = true;
+
+		const geoUrl = 'https://geocoding-api.open-meteo.com/v1/search?count=1&language=ko&format=json&name=' + encodeURIComponent(locationName);
+		const geoRes = await fetch(geoUrl);
+		if (!geoRes.ok) {
+			throw new Error('지역 정보를 가져오지 못했습니다.');
+		}
+
+		const geoData = await geoRes.json();
+		if (!geoData.results || geoData.results.length === 0) {
+			throw new Error('입력한 장소를 찾을 수 없습니다. 다른 이름으로 다시 시도해보세요.');
+		}
+
+		const place = geoData.results[0];
+		const weatherUrl = 'https://api.open-meteo.com/v1/forecast?current=temperature_2m,weather_code,wind_speed_10m&timezone=auto&latitude=' + place.latitude + '&longitude=' + place.longitude;
+		const weatherRes = await fetch(weatherUrl);
+		if (!weatherRes.ok) {
+			throw new Error('날씨 정보를 가져오지 못했습니다.');
+		}
+
+		const weatherData = await weatherRes.json();
+		if (!weatherData.current) {
+			throw new Error('현재 날씨 데이터가 없습니다.');
+		}
+
+		placeEl.textContent = place.name;
+		countryEl.textContent = [place.country, place.admin1].filter(Boolean).join(' · ');
+		timezoneEl.textContent = weatherData.timezone;
+		tempEl.textContent = weatherData.current.temperature_2m + '°C';
+
+		const description = weatherCodeMap[weatherData.current.weather_code] || '날씨 정보 없음';
+		descEl.textContent = description + ' · 바람 ' + weatherData.current.wind_speed_10m + ' km/h';
+
+		startClock(weatherData.timezone);
+		resultEl.hidden = false;
+		setStatus('조회가 완료되었습니다.', false);
+	}
+
+	form.addEventListener('submit', async event => {
+		event.preventDefault();
+		const locationName = input.value.trim();
+
+		if (!locationName) {
+			setStatus('장소를 먼저 입력해주세요.', true);
+			resultEl.hidden = true;
+			return;
+		}
+
+		try {
+			await fetchWeather(locationName);
+		} catch (error) {
+			setStatus(error.message || '오류가 발생했습니다.', true);
+			resultEl.hidden = true;
+		}
+	});
+
+	fetchWeather(input.value.trim()).catch(error => {
+		setStatus(error.message || '초기 데이터를 불러오지 못했습니다.', true);
+	});
+})();
+</script>

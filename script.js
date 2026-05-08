@@ -1,11 +1,34 @@
 // Basic JavaScript for the personal website
 console.log('Welcome to My Personal Website!');
+
+function loadHomeContent() {
+  loadContent('home.html');
+  document.querySelectorAll('.menu-link').forEach(link => {
+    link.classList.remove('active');
+  });
+}
+
 // 콘텐츠 로드 함수
 function loadContent(file) {
   fetch(file)
-    .then(res => res.text())
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to fetch content');
+      return res.text();
+    })
     .then(html => {
-      document.getElementById('content-area').innerHTML = html;
+      const contentArea = document.getElementById('content-area');
+      contentArea.innerHTML = html;
+
+      // Scripts inserted via innerHTML do not run automatically.
+      // Recreate script tags so inline scripts in loaded content execute.
+      contentArea.querySelectorAll('script').forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value);
+        });
+        newScript.textContent = oldScript.textContent;
+        oldScript.replaceWith(newScript);
+      });
     })
     .catch(() => {
       document.getElementById('content-area').innerHTML =
@@ -24,6 +47,7 @@ function setActiveMenu(clickedLink) {
 // 이벤트 바인딩
 document.addEventListener('DOMContentLoaded', () => {
   const menuLinks = document.querySelectorAll('.menu-link');
+  const homeLogo = document.getElementById('home-logo');
 
   menuLinks.forEach(link => {
     link.addEventListener('click', e => {
@@ -35,9 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ✅ 최초 로딩 시 기본 메뉴
-  if (menuLinks.length > 0) {
-    menuLinks[0].classList.add('active');
-    loadContent(menuLinks[0].dataset.file);
+  if (homeLogo) {
+    const openHome = () => loadHomeContent();
+    homeLogo.addEventListener('click', openHome);
+    homeLogo.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openHome();
+      }
+    });
   }
+
+  loadHomeContent();
 });
