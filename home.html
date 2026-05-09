@@ -1,109 +1,106 @@
-<section class="home-welcome">
-  <p class="home-eyebrow">WELCOME</p>
-  <h1>안녕하세요!</h1>
-  <p class="home-message">이 홈페이지에 오신 것을 환영합니다. 왼쪽 메뉴에서 재미있는 자바스크립트 예제와 지역 날씨 기능을 둘러보세요.</p>
-  1. Blazor web app 과 클래스라이브러리 (-core-) 프로젝트 만든후 클래스라이브러리에 필요한 클래스추가
----------- 외부에서 접근 할 수 있는 홈페이지를 먼드려는데 어떻게 세팅해야하지
-    Kestrel 바인딩 -> 0.0.0.0:5047 (HTTP), 0.0.0.0:7043 (HTTPS)
-    LaunchSettings -> 0.0.0.0
-    AllowedHosts -> "*"
-
-    appsettings.json
-{
-"ConnectionStrings": {
-"DefaultConnection": "Data Source=app.db"
-},
-"Kestrel": {
-"Endpoints": {
-"Http": {
-"Url": "http://0.0.0.0:5047"
-},
-"Https": {
-"Url": "https://0.0.0.0:7043"
-}
-}
-},
-"Logging": {
-"LogLevel": {
-"Default": "Information",
-"Microsoft.AspNetCore": "Warning"
-}
-},
-"AllowedHosts": "*"
-}
-    LaunchSettings.json
-{
-"$schema": "https://json.schemastore.org/launchsettings.json",
-"profiles": {
-"http": {
-"commandName": "Project",
-"dotnetRunMessages": true,
-"launchBrowser": true,
-"applicationUrl": "http://0.0.0.0:5047",
-"environmentVariables": {
-"ASPNETCORE_ENVIRONMENT": "Development"
-}
-},
-"https": {
-"commandName": "Project",
-"dotnetRunMessages": true,
-"launchBrowser": true,
-"applicationUrl": "https://0.0.0.0:7043;http://0.0.0.0:5047",
-"environmentVariables": {
-"ASPNETCORE_ENVIRONMENT": "Development"
-}
-}
-}
-}
-
-
----------- 외부에사 접근이 안되는데 어떻게 해야하지
-    공유기 포트포워딩 추가 - 공유기 관리자 페이지 접속 (172.30.1.254)   ---- cmd -> ipconfig -> 기본게이트웨이 IP 주소 (#####무선 상태에서#####)
-        외부포트 : 5047
-        내부 IP :172.30.1.18               ----- 서버의 내부 IP 주소 (#####무선 상태에서#####)
-        내부포트 : 5047
-        프로토콜 : TCP
-    접속주소: http://112.163.222.130:5047  ----- 서버의 공인 IP --- https://ifconfig.me
-    
-2. Blazor web app 프로젝트에서 클래스라이브러리 참조추가
-3. Blazor web app 프로젝트에서 게시판 기능 구현
----------- 이 솔루션은 게시판기능을 구현할서야 . core 프로젝트에 기본이되는 클래스를 만들어줘
-
-생성된 파일:
-📁 Entities (엔티티 클래스)
-•	BaseEntity.cs - 모든 엔티티의 기본 클래스 (Id, CreatedAt, UpdatedAt)
-•	Post.cs - 게시글 엔티티 (제목, 내용, 작성자, 조회수 등)
-•	Comment.cs - 댓글 엔티티 (게시글 참조, 내용, 작성자)
-📁 Interfaces (인터페이스)
-•	IRepository.cs - 기본 CRUD 작업을 위한 제네릭 인터페이스
-•	IPostRepository.cs - 게시글 전용 기능 (페이징, 댓글 포함 조회, 조회수 증가)
-•	ICommentRepository.cs - 댓글 전용 기능 (게시글별 댓글 조회)
-📁 DTOs (데이터 전송 객체)
-•	CreatePostDto.cs - 게시글 조회용 DTO
-•	CreatePostDto.cs - 게시글 생성용 DTO
-•	UpdatePostDto.cs - 게시글 수정용 DTO
-•	CreateCommentDto.cs - 댓글 조회용 DTO
-•	CreateCommentDto.cs - 댓글 생성용 DTO
-
-Comment.cs와 CommentDto.cs의 주요 차이점:
-Comment.cs (Entity - 엔티티)
-•	역할: 데이터베이스 테이블과 직접 매핑되는 도메인 모델
-•	상속: BaseEntity를 상속받아 Id, CreatedAt, UpdatedAt 포함
-•	관계: Post? Post - 데이터베이스 관계를 나타내는 Navigation Property
-•	모든 필드 포함: IsDeleted 같은 내부 상태 관리 필드 포함
-•	사용 위치: Repository, Database Context, 비즈니스 로직 내부
-CommentDto.cs (Data Transfer Object - DTO)
-•	역할: 클라이언트(Blazor 컴포넌트)와 서버 간 데이터 전송용
-•	독립적: 다른 클래스 상속 없이 필요한 속성만 포함
-•	관계 제거: Post Navigation Property 없음 (순환 참조 방지)
-•	필요한 정보만: Id, CreatedAt 등 클라이언트에 필요한 데이터만
-•	민감 정보 제외: IsDeleted 같은 내부 정보 숨김
-•	사용 위치: API 응답, Blazor 컴포넌트, 화면 표시
-왜 분리하나요?
-1.	보안: 클라이언트에 불필요한 데이터 노출 방지
-2.	성능: 필요한 데이터만 전송
-3.	순환 참조 방지: Entity 관계로 인한 JSON 직렬화 오류 방지
-4.	유연성: API 응답 구조를 Entity 구조와 독립적으로 변경 가능
-
----------- 현재 razor 파일에 post 를 나열하는 내용을 만들어줘
+<section>
+1. Blazor web app 과 클래스라이브러리 (-core-) 프로젝트 만든후 클래스라이브러리에 필요한 클래스추가<br>
+---------- 외부에서 접근 할 수 있는 홈페이지를 먼드려는데 어떻게 세팅해야하지<br>
+    Kestrel 바인딩 -&gt; 0.0.0.0:5047 (HTTP), 0.0.0.0:7043 (HTTPS)<br>
+    LaunchSettings -&gt; 0.0.0.0<br>
+    AllowedHosts -&gt; &quot;*&quot;<br>
+<br>
+    appsettings.json<br>
+{<br>
+&quot;ConnectionStrings&quot;: {<br>
+&quot;DefaultConnection&quot;: &quot;Data Source=app.db&quot;<br>
+},<br>
+&quot;Kestrel&quot;: {<br>
+&quot;Endpoints&quot;: {<br>
+&quot;Http&quot;: {<br>
+&quot;Url&quot;: &quot;http://0.0.0.0:5047&quot;<br>
+},<br>
+&quot;Https&quot;: {<br>
+&quot;Url&quot;: &quot;https://0.0.0.0:7043&quot;<br>
+}<br>
+}<br>
+},<br>
+&quot;Logging&quot;: {<br>
+&quot;LogLevel&quot;: {<br>
+&quot;Default&quot;: &quot;Information&quot;,<br>
+&quot;Microsoft.AspNetCore&quot;: &quot;Warning&quot;<br>
+}<br>
+},<br>
+&quot;AllowedHosts&quot;: &quot;*&quot;<br>
+}<br>
+    LaunchSettings.json<br>
+{<br>
+&quot;$schema&quot;: &quot;https://json.schemastore.org/launchsettings.json&quot;,<br>
+&quot;profiles&quot;: {<br>
+&quot;http&quot;: {<br>
+&quot;commandName&quot;: &quot;Project&quot;,<br>
+&quot;dotnetRunMessages&quot;: true,<br>
+&quot;launchBrowser&quot;: true,<br>
+&quot;applicationUrl&quot;: &quot;http://0.0.0.0:5047&quot;,<br>
+&quot;environmentVariables&quot;: {<br>
+&quot;ASPNETCORE_ENVIRONMENT&quot;: &quot;Development&quot;<br>
+}<br>
+},<br>
+&quot;https&quot;: {<br>
+&quot;commandName&quot;: &quot;Project&quot;,<br>
+&quot;dotnetRunMessages&quot;: true,<br>
+&quot;launchBrowser&quot;: true,<br>
+&quot;applicationUrl&quot;: &quot;https://0.0.0.0:7043;http://0.0.0.0:5047&quot;,<br>
+&quot;environmentVariables&quot;: {<br>
+&quot;ASPNETCORE_ENVIRONMENT&quot;: &quot;Development&quot;<br>
+}<br>
+}<br>
+}<br>
+}<br>
+<br>
+<br>
+---------- 외부에사 접근이 안되는데 어떻게 해야하지<br>
+    공유기 포트포워딩 추가 - 공유기 관리자 페이지 접속 (172.30.1.254)   ---- cmd -&gt; ipconfig -&gt; 기본게이트웨이 IP 주소 (#####무선 상태에서#####)<br>
+        외부포트 : 5047<br>
+        내부 IP :172.30.1.18               ----- 서버의 내부 IP 주소 (#####무선 상태에서#####)<br>
+        내부포트 : 5047<br>
+        프로토콜 : TCP<br>
+    접속주소: http://112.163.222.130:5047  ----- 서버의 공인 IP --- https://ifconfig.me<br>
+<br>
+2. Blazor web app 프로젝트에서 클래스라이브러리 참조추가<br>
+3. Blazor web app 프로젝트에서 게시판 기능 구현<br>
+---------- 이 솔루션은 게시판기능을 구현할서야 . core 프로젝트에 기본이되는 클래스를 만들어줘<br>
+<br>
+생성된 파일:<br>
+📁 Entities (엔티티 클래스)<br>
+•	BaseEntity.cs - 모든 엔티티의 기본 클래스 (Id, CreatedAt, UpdatedAt)<br>
+•	Post.cs - 게시글 엔티티 (제목, 내용, 작성자, 조회수 등)<br>
+•	Comment.cs - 댓글 엔티티 (게시글 참조, 내용, 작성자)<br>
+📁 Interfaces (인터페이스)<br>
+•	IRepository.cs - 기본 CRUD 작업을 위한 제네릭 인터페이스<br>
+•	IPostRepository.cs - 게시글 전용 기능 (페이징, 댓글 포함 조회, 조회수 증가)<br>
+•	ICommentRepository.cs - 댓글 전용 기능 (게시글별 댓글 조회)<br>
+📁 DTOs (데이터 전송 객체)<br>
+•	CreatePostDto.cs - 게시글 조회용 DTO<br>
+•	CreatePostDto.cs - 게시글 생성용 DTO<br>
+•	UpdatePostDto.cs - 게시글 수정용 DTO<br>
+•	CreateCommentDto.cs - 댓글 조회용 DTO<br>
+•	CreateCommentDto.cs - 댓글 생성용 DTO<br>
+<br>
+Comment.cs와 CommentDto.cs의 주요 차이점:<br>
+Comment.cs (Entity - 엔티티)<br>
+•	역할: 데이터베이스 테이블과 직접 매핑되는 도메인 모델<br>
+•	상속: BaseEntity를 상속받아 Id, CreatedAt, UpdatedAt 포함<br>
+•	관계: Post? Post - 데이터베이스 관계를 나타내는 Navigation Property<br>
+•	모든 필드 포함: IsDeleted 같은 내부 상태 관리 필드 포함<br>
+•	사용 위치: Repository, Database Context, 비즈니스 로직 내부<br>
+CommentDto.cs (Data Transfer Object - DTO)<br>
+•	역할: 클라이언트(Blazor 컴포넌트)와 서버 간 데이터 전송용<br>
+•	독립적: 다른 클래스 상속 없이 필요한 속성만 포함<br>
+•	관계 제거: Post Navigation Property 없음 (순환 참조 방지)<br>
+•	필요한 정보만: Id, CreatedAt 등 클라이언트에 필요한 데이터만<br>
+•	민감 정보 제외: IsDeleted 같은 내부 정보 숨김<br>
+•	사용 위치: API 응답, Blazor 컴포넌트, 화면 표시<br>
+왜 분리하나요?<br>
+1.	보안: 클라이언트에 불필요한 데이터 노출 방지<br>
+2.	성능: 필요한 데이터만 전송<br>
+3.	순환 참조 방지: Entity 관계로 인한 JSON 직렬화 오류 방지<br>
+4.	유연성: API 응답 구조를 Entity 구조와 독립적으로 변경 가능<br>
+<br>
+---------- 현재 razor 파일에 post 를 나열하는 내용을 만들어줘<br>
 </section>
