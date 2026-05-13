@@ -1,106 +1,287 @@
-<section>
-1. Blazor web app 과 클래스라이브러리 (-core-) 프로젝트 만든후 클래스라이브러리에 필요한 클래스추가<br>
----------- 외부에서 접근 할 수 있는 홈페이지를 먼드려는데 어떻게 세팅해야하지<br>
-    Kestrel 바인딩 -&gt; 0.0.0.0:5047 (HTTP), 0.0.0.0:7043 (HTTPS)<br>
-    LaunchSettings -&gt; 0.0.0.0<br>
-    AllowedHosts -&gt; &quot;*&quot;<br>
-<br>
-    appsettings.json<br>
-{<br>
-&quot;ConnectionStrings&quot;: {<br>
-&quot;DefaultConnection&quot;: &quot;Data Source=app.db&quot;<br>
-},<br>
-&quot;Kestrel&quot;: {<br>
-&quot;Endpoints&quot;: {<br>
-&quot;Http&quot;: {<br>
-&quot;Url&quot;: &quot;http://0.0.0.0:5047&quot;<br>
-},<br>
-&quot;Https&quot;: {<br>
-&quot;Url&quot;: &quot;https://0.0.0.0:7043&quot;<br>
-}<br>
-}<br>
-},<br>
-&quot;Logging&quot;: {<br>
-&quot;LogLevel&quot;: {<br>
-&quot;Default&quot;: &quot;Information&quot;,<br>
-&quot;Microsoft.AspNetCore&quot;: &quot;Warning&quot;<br>
-}<br>
-},<br>
-&quot;AllowedHosts&quot;: &quot;*&quot;<br>
-}<br>
-    LaunchSettings.json<br>
-{<br>
-&quot;$schema&quot;: &quot;https://json.schemastore.org/launchsettings.json&quot;,<br>
-&quot;profiles&quot;: {<br>
-&quot;http&quot;: {<br>
-&quot;commandName&quot;: &quot;Project&quot;,<br>
-&quot;dotnetRunMessages&quot;: true,<br>
-&quot;launchBrowser&quot;: true,<br>
-&quot;applicationUrl&quot;: &quot;http://0.0.0.0:5047&quot;,<br>
-&quot;environmentVariables&quot;: {<br>
-&quot;ASPNETCORE_ENVIRONMENT&quot;: &quot;Development&quot;<br>
-}<br>
-},<br>
-&quot;https&quot;: {<br>
-&quot;commandName&quot;: &quot;Project&quot;,<br>
-&quot;dotnetRunMessages&quot;: true,<br>
-&quot;launchBrowser&quot;: true,<br>
-&quot;applicationUrl&quot;: &quot;https://0.0.0.0:7043;http://0.0.0.0:5047&quot;,<br>
-&quot;environmentVariables&quot;: {<br>
-&quot;ASPNETCORE_ENVIRONMENT&quot;: &quot;Development&quot;<br>
-}<br>
-}<br>
-}<br>
-}<br>
-<br>
-<br>
----------- 외부에사 접근이 안되는데 어떻게 해야하지<br>
-    공유기 포트포워딩 추가 - 공유기 관리자 페이지 접속 (172.30.1.254)   ---- cmd -&gt; ipconfig -&gt; 기본게이트웨이 IP 주소 (#####무선 상태에서#####)<br>
-        외부포트 : 5047<br>
-        내부 IP :172.30.1.18               ----- 서버의 내부 IP 주소 (#####무선 상태에서#####)<br>
-        내부포트 : 5047<br>
-        프로토콜 : TCP<br>
-    접속주소: http://112.163.222.130:5047  ----- 서버의 공인 IP --- https://ifconfig.me<br>
-<br>
-2. Blazor web app 프로젝트에서 클래스라이브러리 참조추가<br>
-3. Blazor web app 프로젝트에서 게시판 기능 구현<br>
----------- 이 솔루션은 게시판기능을 구현할서야 . core 프로젝트에 기본이되는 클래스를 만들어줘<br>
-<br>
-생성된 파일:<br>
-📁 Entities (엔티티 클래스)<br>
-•	BaseEntity.cs - 모든 엔티티의 기본 클래스 (Id, CreatedAt, UpdatedAt)<br>
-•	Post.cs - 게시글 엔티티 (제목, 내용, 작성자, 조회수 등)<br>
-•	Comment.cs - 댓글 엔티티 (게시글 참조, 내용, 작성자)<br>
-📁 Interfaces (인터페이스)<br>
-•	IRepository.cs - 기본 CRUD 작업을 위한 제네릭 인터페이스<br>
-•	IPostRepository.cs - 게시글 전용 기능 (페이징, 댓글 포함 조회, 조회수 증가)<br>
-•	ICommentRepository.cs - 댓글 전용 기능 (게시글별 댓글 조회)<br>
-📁 DTOs (데이터 전송 객체)<br>
-•	CreatePostDto.cs - 게시글 조회용 DTO<br>
-•	CreatePostDto.cs - 게시글 생성용 DTO<br>
-•	UpdatePostDto.cs - 게시글 수정용 DTO<br>
-•	CreateCommentDto.cs - 댓글 조회용 DTO<br>
-•	CreateCommentDto.cs - 댓글 생성용 DTO<br>
-<br>
-Comment.cs와 CommentDto.cs의 주요 차이점:<br>
-Comment.cs (Entity - 엔티티)<br>
-•	역할: 데이터베이스 테이블과 직접 매핑되는 도메인 모델<br>
-•	상속: BaseEntity를 상속받아 Id, CreatedAt, UpdatedAt 포함<br>
-•	관계: Post? Post - 데이터베이스 관계를 나타내는 Navigation Property<br>
-•	모든 필드 포함: IsDeleted 같은 내부 상태 관리 필드 포함<br>
-•	사용 위치: Repository, Database Context, 비즈니스 로직 내부<br>
-CommentDto.cs (Data Transfer Object - DTO)<br>
-•	역할: 클라이언트(Blazor 컴포넌트)와 서버 간 데이터 전송용<br>
-•	독립적: 다른 클래스 상속 없이 필요한 속성만 포함<br>
-•	관계 제거: Post Navigation Property 없음 (순환 참조 방지)<br>
-•	필요한 정보만: Id, CreatedAt 등 클라이언트에 필요한 데이터만<br>
-•	민감 정보 제외: IsDeleted 같은 내부 정보 숨김<br>
-•	사용 위치: API 응답, Blazor 컴포넌트, 화면 표시<br>
-왜 분리하나요?<br>
-1.	보안: 클라이언트에 불필요한 데이터 노출 방지<br>
-2.	성능: 필요한 데이터만 전송<br>
-3.	순환 참조 방지: Entity 관계로 인한 JSON 직렬화 오류 방지<br>
-4.	유연성: API 응답 구조를 Entity 구조와 독립적으로 변경 가능<br>
-<br>
----------- 현재 razor 파일에 post 를 나열하는 내용을 만들어줘<br>
-</section>
+<div class="ai-tools-container">
+    <section class="ai-header">
+        <h1>🤖 인기 AI 도구 가이드</h1>
+        <p>현재 가장 핫한 AI 도구들을 한눈에 비교해보세요!</p>
+    </section>
+
+    <div class="ai-grid">
+        <!-- ChatGPT -->
+        <div class="ai-card">
+            <div class="ai-icon">🤖</div>
+            <h2>ChatGPT</h2>
+            <p class="ai-creator">by OpenAI</p>
+            <p class="ai-description">
+                가장 대중적인 AI 챗봇입니다. 자연스러운 대화, 코딩 도움, 창작 등 다양한 작업이 가능합니다.
+            </p>
+            <div class="ai-features">
+                <span class="feature">💬 자연스러운 대화</span>
+                <span class="feature">💻 코딩 능력</span>
+                <span class="feature">🎨 창작 지원</span>
+            </div>
+            <a href="https://chat.openai.com" target="_blank" class="ai-link">방문하기</a>
+        </div>
+
+        <!-- Claude -->
+        <div class="ai-card">
+            <div class="ai-icon">🧠</div>
+            <h2>Claude</h2>
+            <p class="ai-creator">by Anthropic</p>
+            <p class="ai-description">
+                안전하고 윤리적인 AI입니다. 긴 문맥 처리 능력이 뛰어나며, 복잡한 작업에 능합니다.
+            </p>
+            <div class="ai-features">
+                <span class="feature">📚 긴 문맥 처리</span>
+                <span class="feature">🔒 안전성</span>
+                <span class="feature">📊 분석 능력</span>
+            </div>
+            <a href="https://claude.ai" target="_blank" class="ai-link">방문하기</a>
+        </div>
+
+        <!-- Google Gemini -->
+        <div class="ai-card">
+            <div class="ai-icon">✨</div>
+            <h2>Google Gemini</h2>
+            <p class="ai-creator">by Google</p>
+            <p class="ai-description">
+                구글의 최신 AI입니다. 이미지 인식, 검색 통합, 멀티모달 능력이 뛰어납니다.
+            </p>
+            <div class="ai-features">
+                <span class="feature">🖼️ 이미지 인식</span>
+                <span class="feature">🔍 검색 통합</span>
+                <span class="feature">🎯 멀티모달</span>
+            </div>
+            <a href="https://gemini.google.com" target="_blank" class="ai-link">방문하기</a>
+        </div>
+
+        <!-- GitHub Copilot -->
+        <div class="ai-card">
+            <div class="ai-icon">⚡</div>
+            <h2>GitHub Copilot</h2>
+            <p class="ai-creator">by GitHub & OpenAI</p>
+            <p class="ai-description">
+                개발자를 위한 AI입니다. VS Code와 IDE에 통합되어 코드 자동 완성을 지원합니다.
+            </p>
+            <div class="ai-features">
+                <span class="feature">💻 코드 완성</span>
+                <span class="feature">🔧 IDE 통합</span>
+                <span class="feature">⚙️ 개발 자동화</span>
+            </div>
+            <a href="https://github.com/features/copilot" target="_blank" class="ai-link">방문하기</a>
+        </div>
+
+        <!-- Perplexity AI -->
+        <div class="ai-card">
+            <div class="ai-icon">🔎</div>
+            <h2>Perplexity AI</h2>
+            <p class="ai-creator">by Perplexity AI</p>
+            <p class="ai-description">
+                검색 기반 AI입니다. 최신 정보를 기반으로 정확한 답변을 제공합니다.
+            </p>
+            <div class="ai-features">
+                <span class="feature">📰 최신 정보</span>
+                <span class="feature">🔗 출처 표시</span>
+                <span class="feature">🌐 웹 검색</span>
+            </div>
+            <a href="https://www.perplexity.ai" target="_blank" class="ai-link">방문하기</a>
+        </div>
+
+        <!-- Anthropic Claude Opus -->
+        <div class="ai-card">
+            <div class="ai-icon">👑</div>
+            <h2>Meta Llama</h2>
+            <p class="ai-creator">by Meta</p>
+            <p class="ai-description">
+                오픈소스 AI 모델입니다. 무료로 사용 가능하며, 다양한 플랫폼에서 실행할 수 있습니다.
+            </p>
+            <div class="ai-features">
+                <span class="feature">📂 오픈소스</span>
+                <span class="feature">🆓 무료 사용</span>
+                <span class="feature">⚙️ 커스터마이징</span>
+            </div>
+            <a href="https://www.meta.com/llama/" target="_blank" class="ai-link">방문하기</a>
+        </div>
+    </div>
+
+    <section class="ai-comparison">
+        <h2>📊 AI 선택 가이드</h2>
+        <ul>
+            <li>✅ <strong>일반적인 질문:</strong> ChatGPT, Claude, Gemini</li>
+            <li>✅ <strong>코딩 도움:</strong> GitHub Copilot, ChatGPT</li>
+            <li>✅ <strong>최신 정보 조사:</strong> Perplexity AI, Gemini</li>
+            <li>✅ <strong>창작 및 글쓰기:</strong> Claude, ChatGPT</li>
+            <li>✅ <strong>이미지 처리:</strong> Gemini, ChatGPT (Plus)</li>
+            <li>✅ <strong>로컬 실행:</strong> Meta Llama</li>
+        </ul>
+    </section>
+</div>
+
+<style>
+.ai-tools-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ai-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+}
+
+.ai-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.ai-header p {
+    font-size: 1.1rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.ai-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    border-left: 4px solid #667eea;
+}
+
+.ai-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ai-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.ai-card h2 {
+    margin: 0.5rem 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.ai-creator {
+    margin: 0.3rem 0 1rem 0;
+    color: #999;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.ai-description {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.ai-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.feature {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.ai-link {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+    transition: opacity 0.3s ease;
+}
+
+.ai-link:hover {
+    opacity: 0.9;
+}
+
+.ai-comparison {
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 2rem;
+    border-left: 4px solid #667eea;
+}
+
+.ai-comparison h2 {
+    color: #333;
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.ai-comparison ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ai-comparison li {
+    padding: 0.8rem 0;
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.6;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ai-comparison li:last-child {
+    border-bottom: none;
+}
+
+.ai-comparison strong {
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .ai-tools-container {
+        padding: 1rem;
+    }
+
+    .ai-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .ai-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}

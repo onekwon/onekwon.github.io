@@ -1,0 +1,188 @@
+<div class="intro-container">
+    <section class="intro-header">
+        <h1>👋 안녕하세요!</h1>
+        <p class="intro-subtitle">저는 원권입니다</p>
+    </section>
+
+    <section class="intro-about">
+        <h2>📌 소개</h2>
+        <p>
+            이 사이트는 다양한 웹 프로젝트와 기능들을 담고 있습니다.
+            웹 개발을 배우고 실험하며, 재미있는 기능들을 구현해보는 공간입니다.
+        </p>
+    </section>
+
+    <section class="intro-skills">
+        <h2>🛠️ 주요 기능</h2>
+        <div class="skills-grid">
+            <div class="skill-card">
+                <span class="skill-icon">⛅</span>
+                <h3>지역 날씨</h3>
+                <p>실시간 날씨 정보 확인</p>
+            </div>
+            <div class="skill-card">
+                <span class="skill-icon">✊</span>
+                <h3>가위바위보</h3>
+                <p>게임으로 즐기는 시간</p>
+            </div>
+            <div class="skill-card">
+                <span class="skill-icon">🎨</span>
+                <h3>색상 팔레트</h3>
+                <p>멋진 색상 조합 탐색</p>
+            </div>
+            <div class="skill-card">
+                <span class="skill-icon">⌨️</span>
+                <h3>타이핑 테스트</h3>
+                <p>타이핑 속도 측정</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="intro-contact">
+        <h2>📬 연락처</h2>
+        <p>
+            궁금한 사항이 있으신가요?<br>
+            메뉴의 Contact를 통해 연락해주세요!
+        </p>
+    </section>
+
+    <section class="intro-footer">
+        <p>🌟 방문해주셔서 감사합니다!</p>
+    </section>
+</div>
+
+<style>
+.intro-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.intro-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+}
+
+.intro-header h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.intro-subtitle {
+    font-size: 1.5rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.intro-about,
+.intro-skills,
+.intro-contact {
+    margin-bottom: 2rem;
+}
+
+.intro-about h2,
+.intro-skills h2,
+.intro-contact h2 {
+    color: #333;
+    font-size: 1.8rem;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.intro-about p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.skill-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.skill-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.skill-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.skill-card h3 {
+    margin: 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.skill-card p {
+    margin: 0;
+    color: #777;
+    font-size: 0.9rem;
+}
+
+.intro-contact {
+    text-align: center;
+    background: #f0f7ff;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.intro-contact p {
+    font-size: 1.1rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.intro-footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.2rem;
+    color: #667eea;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .intro-container {
+        padding: 1rem;
+    }
+
+    .intro-header h1 {
+        font-size: 2rem;
+    }
+
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+</style>
