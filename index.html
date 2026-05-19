@@ -8,8 +8,13 @@
 </head>
 <body>
     <header class="top-nav">
-        <div class="logo" id="home-logo" role="button" tabindex="0" aria-label="홈으로 이동">My Website</div>
-        <nav>
+        <div class="logo" id="home-logo" role="button" tabindex="0" aria-label="홈으로 이동">Home</div>
+        <button id="menu-toggle" class="menu-toggle" aria-label="메뉴 토글">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav id="main-nav">
             <ul>
                 <li><a href="#">Home</a></li>
                 <li><a href="#">About</a></li>
@@ -19,7 +24,7 @@
         </nav>
     </header>
     <div class="container">        
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
           <ul>
             <li><a href="#" data-file="intro.html" class="menu-link">👋 소개</a></li>
             <li><a href="#" data-file="weather.html" class="menu-link">⛅ 지역 날씨</a></li>

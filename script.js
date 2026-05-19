@@ -44,11 +44,42 @@ function setActiveMenu(clickedLink) {
   clickedLink.classList.add('active');
 }
 
+// 메뉴 토글 함수
+function toggleMenu() {
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const mainNav = document.getElementById('main-nav');
+  
+  menuToggle.classList.toggle('active');
+  sidebar.classList.toggle('active');
+  mainNav.classList.toggle('active');
+}
+
+// 메뉴 닫기 함수
+function closeMenu() {
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const mainNav = document.getElementById('main-nav');
+  
+  menuToggle.classList.remove('active');
+  sidebar.classList.remove('active');
+  mainNav.classList.remove('active');
+}
+
 // 이벤트 바인딩
 document.addEventListener('DOMContentLoaded', () => {
   const menuLinks = document.querySelectorAll('.menu-link');
   const homeLogo = document.getElementById('home-logo');
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const mainNav = document.getElementById('main-nav');
 
+  // 메뉴 토글 버튼 클릭 이벤트
+  if (menuToggle) {
+    menuToggle.addEventListener('click', toggleMenu);
+  }
+
+  // 메뉴 링크 클릭 시 메뉴 닫기
   menuLinks.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -56,11 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const file = link.dataset.file;
       loadContent(file);
       setActiveMenu(link);
+      closeMenu();
     });
   });
 
+  // 메뉴 외 영역 클릭 시 메뉴 닫기
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.top-nav') && !e.target.closest('.sidebar')) {
+      closeMenu();
+    }
+  });
+
   if (homeLogo) {
-    const openHome = () => loadHomeContent();
+    const openHome = () => {
+      loadHomeContent();
+      closeMenu();
+    };
     homeLogo.addEventListener('click', openHome);
     homeLogo.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
