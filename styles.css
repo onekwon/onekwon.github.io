@@ -11,6 +11,7 @@ body {
     display: flex;
     width: 100%;
     min-height: 100vh;
+    align-items: flex-start;
 }
 
 /* Header styles */
@@ -137,6 +138,10 @@ header nav ul li a {
     padding: 1rem;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
 }
 
 .sidebar ul {
@@ -373,6 +378,11 @@ footer {
     }
 }
 
+@media (max-width: 480px) {
+    .sidebar ul {
+        grid-template-columns: 1fr;
+    }
+
     .sidebar ul li a {
         text-align: center;
         padding: 0.65rem 0.5rem;
@@ -395,12 +405,6 @@ footer {
     .home-message {
         font-size: 0.98rem;
         line-height: 1.6;
-    }
-}
-
-@media (max-width: 480px) {
-    .sidebar ul {
-        grid-template-columns: 1fr;
     }
 
     .top-nav nav ul li a {
