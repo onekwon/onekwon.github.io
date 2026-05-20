@@ -49,10 +49,15 @@ function toggleMenu() {
   const menuToggle = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');
   const mainNav = document.getElementById('main-nav');
+  const menuBackdrop = document.getElementById('menu-backdrop');
   
-  menuToggle.classList.toggle('active');
-  sidebar.classList.toggle('active');
-  mainNav.classList.toggle('active');
+  const isOpen = menuToggle.classList.toggle('active');
+  sidebar.classList.toggle('active', isOpen);
+  mainNav.classList.toggle('active', isOpen);
+  if (menuBackdrop) {
+    menuBackdrop.classList.toggle('active', isOpen);
+  }
+  document.body.classList.toggle('menu-open', isOpen);
 }
 
 // 메뉴 닫기 함수
@@ -60,10 +65,15 @@ function closeMenu() {
   const menuToggle = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');
   const mainNav = document.getElementById('main-nav');
+  const menuBackdrop = document.getElementById('menu-backdrop');
   
   menuToggle.classList.remove('active');
   sidebar.classList.remove('active');
   mainNav.classList.remove('active');
+  if (menuBackdrop) {
+    menuBackdrop.classList.remove('active');
+  }
+  document.body.classList.remove('menu-open');
 }
 
 // 이벤트 바인딩
@@ -73,10 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');
   const mainNav = document.getElementById('main-nav');
+  const menuBackdrop = document.getElementById('menu-backdrop');
 
   // 메뉴 토글 버튼 클릭 이벤트
   if (menuToggle) {
     menuToggle.addEventListener('click', toggleMenu);
+  }
+
+  if (menuBackdrop) {
+    menuBackdrop.addEventListener('click', closeMenu);
   }
 
   // 메뉴 링크 클릭 시 메뉴 닫기
